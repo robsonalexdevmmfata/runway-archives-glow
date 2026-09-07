@@ -19,6 +19,12 @@
  */
 
 @theme inline {
+  --font-display: "Anton", sans-serif;
+  --font-sans: "Poppins", sans-serif;
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-panel: var(--panel);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
