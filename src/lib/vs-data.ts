@@ -14,6 +14,9 @@ export type Nominee = {
   sub: string;
   img: string;
   rank: string;
+  videoUrl?: string;
+  details?: string;
+  gallery?: string[];
 };
 
 export type Category = {
@@ -50,11 +53,42 @@ export const categories: Category[] = [
     kicker: "AS ASAS MAIS ICÔNICAS",
     label: "INDICADA",
     nominees: [
-      { name: "ADRIANA LIMA", sub: "1999 — 2018", img: model1, rank: "1º" },
-      { name: "TYRA BANKS", sub: "1997 — 2005", img: model4, rank: "2º" },
-      { name: "CANDICE SWANEPOEL", sub: "2010 — 2018", img: model3, rank: "3º" },
-      { name: "ALESSANDRA AMBROSIO", sub: "2004 — 2017", img: model5, rank: "4º" },
-      { name: "ASHLEY GRAHAM", sub: "2024 — 2026", img: model2, rank: "5º" },
+      { 
+        name: "ADRIANA LIMA", 
+        sub: "1999 — 2018", 
+        img: model1, 
+        rank: "1º",
+        details: "Adriana Lima é considerada uma das Angels mais icônicas da história da Victoria's Secret. Com 19 anos de desfiles consecutivos, ela se tornou sinônimo da marca, usando o Fantasy Bra em 2008, 2010 e 2014. Sua presença na passarela é marcada por carisma, elegância e profissionalismo incomparável.",
+        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+        gallery: [model2, model3, model4]
+      },
+      { 
+        name: "TYRA BANKS", 
+        sub: "1997 — 2005", 
+        img: model4, 
+        rank: "2º",
+        details: "Tyra Banks foi a primeira Angel afro-americana e usou o icônico Fantasy Bra em 2001. Ela revolucionou os padrões de beleza e abriu portas para maior diversidade na indústria da moda.",
+        gallery: [model1, model5]
+      },
+      { 
+        name: "CANDICE SWANEPOEL", 
+        sub: "2010 — 2018", 
+        img: model3, 
+        rank: "3º",
+        details: "Candice Swanepoel é conhecida por sua beleza sul-africana e elegância na passarela. Ela usou o Royal Fantasy Bra em 2013, avaliado em US$ 10 milhões.",
+      },
+      { 
+        name: "ALESSANDRA AMBROSIO", 
+        sub: "2004 — 2017", 
+        img: model5, 
+        rank: "4º" 
+      },
+      { 
+        name: "ASHLEY GRAHAM", 
+        sub: "2024 — 2026", 
+        img: model2, 
+        rank: "5º" 
+      },
     ],
   },
   {
