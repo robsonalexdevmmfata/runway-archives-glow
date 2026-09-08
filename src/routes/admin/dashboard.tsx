@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAdminStore } from "@/lib/admin-store";
-import type { Nominee } from "@/lib/vs-data";
+import type { Nominee, Category } from "@/lib/vs-data";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: AdminDashboard,
@@ -312,7 +312,7 @@ function NomineeDialog({
 }: { 
   open: boolean; 
   onClose: () => void; 
-  nominee?: Nominee;
+  nominee?: Nominee | undefined;
   onSave: (nominee: Nominee) => void;
 }) {
   const [formData, setFormData] = useState<Nominee>(
@@ -1372,7 +1372,7 @@ function ContentSection({ adminStore }: { adminStore: ReturnType<typeof useAdmin
       {/* Dialogs para editar ticker e stats */}
       {editingTickerIndex !== null && (
         <TickerItemDialog
-          item={adminStore.siteConfig.ticker.items[editingTickerIndex]}
+          item={adminStore.siteConfig.ticker.items[editingTickerIndex]!}
           onSave={(updates) => {
             adminStore.updateTickerItem(editingTickerIndex, updates);
             setEditingTickerIndex(null);
@@ -1383,7 +1383,7 @@ function ContentSection({ adminStore }: { adminStore: ReturnType<typeof useAdmin
 
       {editingStatIndex !== null && (
         <StatDialog
-          stat={adminStore.siteConfig.statsSection.stats[editingStatIndex]}
+          stat={adminStore.siteConfig.statsSection.stats[editingStatIndex]!}
           onSave={(updates) => {
             adminStore.updateStat(editingStatIndex, updates);
             setEditingStatIndex(null);
