@@ -10,11 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as CategoriaSlugRouteImport } from './routes/categoria.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
@@ -25,27 +37,36 @@ const CategoriaSlugRoute = CategoriaSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/login': typeof AdminLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/login': typeof AdminLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/login': typeof AdminLoginRoute
   '/categoria/$slug': typeof CategoriaSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/categoria/$slug'
+  fullPaths: '/' | '/admin/dashboard' | '/admin/login' | '/categoria/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/categoria/$slug'
-  id: '__root__' | '/' | '/categoria/$slug'
+  to: '/' | '/admin/dashboard' | '/admin/login' | '/categoria/$slug'
+  id:
+    '__root__' | '/' | '/admin/dashboard' | '/admin/login' | '/categoria/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   CategoriaSlugRoute: typeof CategoriaSlugRoute
 }
 
@@ -56,6 +77,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categoria/$slug': {
@@ -70,6 +105,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminLoginRoute: AdminLoginRoute,
   CategoriaSlugRoute: CategoriaSlugRoute,
 }
 export const routeTree = rootRouteImport

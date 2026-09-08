@@ -53,21 +53,22 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <Link
               key={label}
               to={to}
-              className="flex flex-col items-center gap-2 border-b border-accent/20 px-2 py-4 text-center transition-colors hover:bg-secondary"
+              className="group flex flex-col items-center gap-2 border-b border-accent/20 px-2 py-4 text-center transition-all duration-300 hover:bg-pink-500/10"
+              activeProps={{ className: "bg-pink-500/15 shadow-[inset_3px_0_0_0_rgba(236,72,153,0.8)]" }}
             >
-              <Icon className="size-6 text-gold" strokeWidth={2.2} />
-              <span className="text-[10px] font-semibold leading-tight text-gold-soft">{label}</span>
+              <Icon className="size-6 text-gold transition-colors duration-300 group-hover:text-pink-300" strokeWidth={2.2} />
+              <span className="text-[10px] font-semibold leading-tight text-gold-soft transition-colors duration-300 group-hover:text-pink-300">{label}</span>
             </Link>
           ) : (
             <Link
               key={label}
               to="/categoria/$slug"
               params={{ slug: slug! }}
-              className="flex flex-col items-center gap-2 border-b border-accent/20 px-2 py-4 text-center transition-colors hover:bg-secondary"
-              activeProps={{ className: "bg-secondary" }}
+              className="group flex flex-col items-center gap-2 border-b border-accent/20 px-2 py-4 text-center transition-all duration-300 hover:bg-pink-500/10"
+              activeProps={{ className: "bg-pink-500/15 shadow-[inset_3px_0_0_0_rgba(236,72,153,0.8)]" }}
             >
-              <Icon className="size-6 text-gold" strokeWidth={2.2} />
-              <span className="text-[10px] font-semibold leading-tight text-gold-soft">{label}</span>
+              <Icon className="size-6 text-gold transition-colors duration-300 group-hover:text-pink-300" strokeWidth={2.2} />
+              <span className="text-[10px] font-semibold leading-tight text-gold-soft transition-colors duration-300 group-hover:text-pink-300">{label}</span>
             </Link>
           ),
         )}
