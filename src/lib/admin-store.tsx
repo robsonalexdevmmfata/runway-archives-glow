@@ -6,6 +6,9 @@ type SiteConfig = {
   siteName: string;
   siteTagline: string;
   logoText: string;
+  logoImage: string;
+  headerImage: string;
+  faviconImage: string;
   headerButtons: { label: string; action: string }[];
   footerText: string;
   
