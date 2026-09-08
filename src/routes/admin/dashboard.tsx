@@ -1015,16 +1015,45 @@ function ContentSection({ adminStore }: { adminStore: ReturnType<typeof useAdmin
                 />
               </div>
               <div className="space-y-2">
-                <Label>URL da Imagem de Fundo</Label>
-                <Input
-                  value={adminStore.siteConfig.heroSection.backgroundImage}
-                  onChange={(e) =>
-                    adminStore.updateSiteConfig({
-                      heroSection: { ...adminStore.siteConfig.heroSection, backgroundImage: e.target.value },
-                    })
-                  }
-                  placeholder="/assets/hero-runway.jpg"
-                />
+                <Label>Imagem de Fundo do Hero</Label>
+                <div className="flex gap-3 items-start">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="hero-bg-upload"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          adminStore.updateSiteConfig({
+                            heroSection: { ...adminStore.siteConfig.heroSection, backgroundImage: reader.result as string },
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById("hero-bg-upload")?.click()}
+                    className="flex-1"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Fazer Upload da Imagem
+                  </Button>
+                </div>
+                {adminStore.siteConfig.heroSection.backgroundImage && (
+                  <div className="mt-3">
+                    <img
+                      src={adminStore.siteConfig.heroSection.backgroundImage}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-lg border border-pink-500/30"
+                    />
+                  </div>
+                )}
               </div>
               <Button
                 onClick={() => alert("Hero Section salva automaticamente!")}
@@ -1186,7 +1215,33 @@ function ContentSection({ adminStore }: { adminStore: ReturnType<typeof useAdmin
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {adminStore.categories.map((cat) => (
                   <div key={cat.slug} className="p-4 bg-panel rounded-lg border border-pink-500/20 text-center">
-                    <img src={cat.circle} alt={cat.title} className="w-20 h-20 rounded-full mx-auto mb-2 object-cover" />
+                    <div className="relative w-20 h-20 mx-auto mb-2">
+                      <img src={cat.circle} alt={cat.title} className="w-full h-full rounded-full object-cover border-2 border-pink-500/50" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id={`circle-upload-${cat.slug}`}
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              adminStore.updateCategory(cat.slug, { circle: reader.result as string });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full p-0"
+                        onClick={() => document.getElementById(`circle-upload-${cat.slug}`)?.click()}
+                      >
+                        <Upload className="w-3 h-3" />
+                      </Button>
+                    </div>
                     <h4 className="font-display text-sm text-gold">{cat.title}</h4>
                     <p className="text-xs text-muted-foreground mt-1">{cat.nominees.length} nominees</p>
                     <div className="flex gap-2 mt-3">
