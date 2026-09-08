@@ -3,6 +3,7 @@ import { Home, Film, Star, Music, Trophy, Calendar, Sparkle, Crown } from "lucid
 import type { ReactNode } from "react";
 
 import { categories } from "@/lib/vs-data";
+import { useAdminStore } from "@/lib/admin-store";
 
 const nav = [
   { icon: Home, label: "Home", to: "/" as const },
