@@ -238,6 +238,20 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
     }
   }, [categories, siteConfig]);
 
+  // Aplicar favicon personalizado
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const href = siteConfig.faviconImage;
+    if (!href) return;
+    let link = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    link.href = href;
+  }, [siteConfig.faviconImage]);
+
   const updateCategory = (slug: string, updates: Partial<Category>) => {
     setCategories((prev) =>
       prev.map((cat) => (cat.slug === slug ? { ...cat, ...updates } : cat))
