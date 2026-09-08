@@ -563,6 +563,52 @@ function SiteConfigSection({ adminStore }: { adminStore: ReturnType<typeof useAd
             onChange={(e) => setConfig({ ...config, logoText: e.target.value })}
           />
         </div>
+        {([
+          { key: "logoImage", label: "Logo (aparece no topo e no rodapé)" },
+          { key: "headerImage", label: "Imagem do Header" },
+          { key: "faviconImage", label: "Favicon" },
+        ] as const).map(({ key, label }) => (
+          <div key={key} className="space-y-2">
+            <Label>{label}</Label>
+            <div className="flex items-center gap-3">
+              {config[key] ? (
+                <img
+                  src={config[key]}
+                  alt={label}
+                  className="size-16 rounded border border-border bg-black/30 object-contain p-1"
+                />
+              ) : (
+                <div className="flex size-16 items-center justify-center rounded border border-dashed border-border text-[10px] text-muted-foreground">
+                  vazio
+                </div>
+              )}
+              <div className="space-y-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () =>
+                      setConfig((prev) => ({ ...prev, [key]: String(reader.result) }));
+                    reader.readAsDataURL(file);
+                  }}
+                />
+                {config[key] ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setConfig((prev) => ({ ...prev, [key]: "" }))}
+                  >
+                    Remover
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ))}
         <div className="space-y-2">
           <Label>Texto do Rodapé</Label>
           <Textarea
