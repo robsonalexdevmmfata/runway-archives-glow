@@ -108,6 +108,9 @@ const defaultSiteConfig: SiteConfig = {
   siteName: "RUNWAY WAVY",
   siteTagline: "VICTORIA'S SECRET 2026",
   logoText: "RUNWAY WAVY",
+  logoImage: "",
+  headerImage: "",
+  faviconImage: "",
   headerButtons: [
     { label: "ENTRAR", action: "login" },
     { label: "REGISTRAR", action: "register" },
