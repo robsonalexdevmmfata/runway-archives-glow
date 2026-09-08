@@ -36,9 +36,19 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <span className="text-xs font-bold tracking-widest">REGISTRAR</span>
         </div>
         <Link to="/" className="mx-auto text-center leading-none">
-          <div className="font-display text-3xl tracking-tight md:text-4xl">RUNWAY WAVY</div>
+          {siteConfig.logoImage ? (
+            <img
+              src={siteConfig.logoImage}
+              alt={siteConfig.siteName}
+              className="mx-auto h-12 w-auto object-contain md:h-14"
+            />
+          ) : (
+            <div className="font-display text-3xl tracking-tight md:text-4xl">
+              {siteConfig.logoText || "RUNWAY WAVY"}
+            </div>
+          )}
           <div className="text-[10px] font-bold tracking-[0.5em] text-accent-foreground/70">
-            VICTORIA&apos;S SECRET 2026
+            {siteConfig.siteTagline}
           </div>
         </Link>
         <input
