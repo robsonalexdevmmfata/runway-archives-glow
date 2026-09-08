@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { SiteShell, Ticker, StoriesRow } from "@/components/site-shell";
+import { SiteShell, Ticker, StoriesRow, SiteFooter } from "@/components/site-shell";
 import { getCategory, type Nominee } from "@/lib/vs-data";
 import {
   Dialog,
@@ -162,9 +162,7 @@ function CategoryPage() {
         </DialogContent>
       </Dialog>
 
-      <footer className="bg-panel px-6 py-8 text-center text-xs text-muted-foreground">
-        Runway Wavy — arquivo não oficial dedicado à história dos desfiles da Victoria&apos;s Secret.
-      </footer>
+      <SiteFooter />
     </SiteShell>
   );
 }

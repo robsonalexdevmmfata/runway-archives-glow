@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { SiteShell, Ticker, StoriesRow } from "@/components/site-shell";
+import { SiteShell, Ticker, StoriesRow, SiteFooter } from "@/components/site-shell";
 import heroRunway from "@/assets/hero-runway.jpg";
 import show60s from "@/assets/show-1960s.jpg";
 import show90s from "@/assets/show-1990s.jpg";
@@ -167,9 +167,7 @@ function Index() {
         ))}
       </section>
 
-      <footer className="bg-panel px-6 py-8 text-center text-xs text-muted-foreground">
-        Runway Wavy — arquivo não oficial dedicado à história dos desfiles da Victoria&apos;s Secret.
-      </footer>
+      <SiteFooter />
     </SiteShell>
   );
 }

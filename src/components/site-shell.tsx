@@ -148,3 +148,30 @@ export function Ticker() {
     </div>
   );
 }
+
+export function SiteFooter() {
+  const { siteConfig } = useAdminStore();
+  return (
+    <footer className="bg-panel px-6 py-8 text-center text-xs text-muted-foreground">
+      {siteConfig.logoImage ? (
+        <img
+          src={siteConfig.logoImage}
+          alt={siteConfig.siteName}
+          className="mx-auto mb-4 h-14 w-auto object-contain"
+        />
+      ) : null}
+      <p>{siteConfig.footerText}</p>
+      <p className="mt-2">
+        Desenvolvido por{" "}
+        <a
+          href="https://www.agenciainfotech.com.br"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-gold hover:underline"
+        >
+          Agência Info Tech
+        </a>
+      </p>
+    </footer>
+  );
+}
