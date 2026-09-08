@@ -1,19 +1,15 @@
-import { createFileRoute, useNavigate, Outlet } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { 
-  LogOut, 
-  Settings, 
-  Image, 
-  Menu as MenuIcon, 
-  Palette,
-  FileText,
-  Home,
-  LayoutDashboard
-} from "lucide-react";
+import { LogOut, Settings, Image, Palette, FileText, Home, LayoutDashboard, Plus, Trash2, Edit, Download, Upload, RefreshCw, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AdminStoreProvider, useAdminStore } from "@/lib/admin-store";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAdminStore } from "@/lib/admin-store";
+import type { Nominee } from "@/lib/vs-data";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: AdminDashboard,
@@ -23,9 +19,9 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState("");
   const [activeSection, setActiveSection] = useState("overview");
+  const adminStore = useAdminStore();
 
   useEffect(() => {
-    // Verificar autenticação
     const session = localStorage.getItem("admin_session");
     const adminUser = localStorage.getItem("admin_user");
     
@@ -46,697 +42,1350 @@ function AdminDashboard() {
   const menuItems = [
     { id: "overview", icon: LayoutDashboard, label: "Visão Geral" },
     { id: "categories", icon: Image, label: "Categorias" },
-    { id: "site-config", icon: Settings, label: "Configurações do Site" },
-    { id: "menu", icon: MenuIcon, label: "Menu/Navbar" },
+    { id: "site-config", icon: Settings, label: "Configurações" },
     { id: "colors", icon: Palette, label: "Cores e Tema" },
     { id: "content", icon: FileText, label: "Conteúdo" },
   ];
 
   return (
-    <AdminStoreProvider>
-      <div className="min-h-screen bg-background flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-panel border-r border-border flex flex-col">
-          {/* Header da Sidebar */}
-          <div className="p-6 border-b border-border">
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-panel border-r border-border flex flex-col">
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-primary rounded-lg flex items-center justify-center shadow-lg">
+              <Settings className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-display text-lg text-gold">Admin Panel</h2>
+              <p className="text-xs text-muted-foreground">Runway Wavy</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`
+                  w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300
+                  ${isActive 
+                    ? "bg-pink-500/15 text-pink-400 shadow-[inset_3px_0_0_0_rgba(236,72,153,0.8)]" 
+                    : "text-muted-foreground hover:bg-pink-500/10 hover:text-pink-300"
+                  }
+                `}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-sm font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-border">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-primary rounded-lg flex items-center justify-center shadow-lg">
-                <Settings className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-gradient-to-br from-gold to-accent rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-background">{user.charAt(0).toUpperCase()}</span>
               </div>
               <div>
-                <h2 className="font-display text-lg text-gold">Admin Panel</h2>
-                <p className="text-xs text-muted-foreground">Runway Wavy</p>
+                <p className="text-sm font-medium text-foreground">{user}</p>
+                <p className="text-xs text-muted-foreground">Administrador</p>
               </div>
-            </div>
-          </div>
-
-          {/* Menu Items */}
-          <nav className="flex-1 p-4 space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeSection === item.id;
-              
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveSection(item.id)}
-                  className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300
-                    ${isActive 
-                      ? "bg-pink-500/15 text-pink-400 shadow-[inset_3px_0_0_0_rgba(236,72,153,0.8)]" 
-                      : "text-muted-foreground hover:bg-pink-500/10 hover:text-pink-300"
-                    }
-                  `}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-sm font-medium">{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* User Info & Logout */}
-          <div className="p-4 border-t border-border">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-gold to-accent rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-background">{user.charAt(0).toUpperCase()}</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{user}</p>
-                  <p className="text-xs text-muted-foreground">Administrador</p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLogout}
-                className="hover:bg-destructive/10 hover:text-destructive"
-                title="Sair"
-              >
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto">
-          {/* Top Bar */}
-          <header className="h-16 bg-panel border-b border-border px-8 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-display text-gold">
-                {menuItems.find(m => m.id === activeSection)?.label || "Dashboard"}
-              </h1>
-              <p className="text-xs text-muted-foreground">Gerencie todo o conteúdo do seu site</p>
             </div>
             <Button
-              variant="outline"
-              className="border-pink-500/30 hover:bg-pink-500/10 hover:border-pink-400"
-              onClick={() => window.open("/", "_blank")}
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="hover:bg-destructive/10 hover:text-destructive"
+              title="Sair"
             >
-              <Home className="w-4 h-4 mr-2" />
-              Ver Site
+              <LogOut className="w-4 h-4" />
             </Button>
-          </header>
-
-          {/* Content Area */}
-          <div className="p-8">
-            {activeSection === "overview" && <OverviewSection />}
-            {activeSection === "categories" && <CategoriesSection />}
-            {activeSection === "site-config" && <SiteConfigSection />}
-            {activeSection === "menu" && <MenuSection />}
-            {activeSection === "colors" && <ColorsSection />}
-            {activeSection === "content" && <ContentSection />}
           </div>
-        </main>
-      </div>
-    </AdminStoreProvider>
-  );
-}
+        </div>
+      </aside>
 
-// Placeholder components for each section
-function OverviewSection() {
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-card p-6 rounded-lg border border-pink-500/20">
-          <h3 className="text-sm font-medium text-muted-foreground">Total de Categorias</h3>
-          <p className="text-3xl font-display text-gold mt-2">7</p>
-        </div>
-        <div className="bg-card p-6 rounded-lg border border-pink-500/20">
-          <h3 className="text-sm font-medium text-muted-foreground">Total de Nominees</h3>
-          <p className="text-3xl font-display text-gold mt-2">35</p>
-        </div>
-        <div className="bg-card p-6 rounded-lg border border-pink-500/20">
-          <h3 className="text-sm font-medium text-muted-foreground">Última Atualização</h3>
-          <p className="text-3xl font-display text-gold mt-2">Hoje</p>
-        </div>
-      </div>
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto">
+        <header className="h-16 bg-panel border-b border-border px-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-display text-gold">
+              {menuItems.find(m => m.id === activeSection)?.label || "Dashboard"}
+            </h1>
+            <p className="text-xs text-muted-foreground">Gerencie todo o conteúdo do seu site</p>
+          </div>
+          <Button
+            variant="outline"
+            className="border-pink-500/30 hover:bg-pink-500/10 hover:border-pink-400"
+            onClick={() => window.open("/", "_blank")}
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Ver Site
+          </Button>
+        </header>
 
-      <div className="bg-card p-6 rounded-lg border border-border">
-        <h3 className="text-lg font-display text-gold mb-4">Bem-vindo ao Painel Admin!</h3>
-        <p className="text-muted-foreground">
-          Use o menu lateral para navegar entre as diferentes seções e editar o conteúdo do site.
-        </p>
-        <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-          <li>✨ <strong>Categorias:</strong> Edite fotos, textos e vídeos</li>
-          <li>⚙️ <strong>Configurações:</strong> Logo, favicon, header, footer</li>
-          <li>🎨 <strong>Cores:</strong> Personalize o tema do site</li>
-          <li>📝 <strong>Conteúdo:</strong> Edite textos e descrições</li>
-        </ul>
-      </div>
+        <div className="p-8">
+          {activeSection === "overview" && <OverviewSection adminStore={adminStore} />}
+          {activeSection === "categories" && <CategoriesSection adminStore={adminStore} />}
+          {activeSection === "site-config" && <SiteConfigSection adminStore={adminStore} />}
+          {activeSection === "colors" && <ColorsSection adminStore={adminStore} />}
+          {activeSection === "content" && <ContentSection adminStore={adminStore} />}
+        </div>
+      </main>
     </div>
   );
 }
 
-function CategoriesSection() {
-  const { data, updateCategory, updateNominee, addNominee, deleteNominee } = useAdminStore();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [editingNominee, setEditingNominee] = useState<string | null>(null);
+// Seção: Visão Geral
+function OverviewSection({ adminStore }: { adminStore: ReturnType<typeof useAdminStore> }) {
+  const totalNominees = adminStore.categories.reduce((acc, cat) => acc + cat.nominees.length, 0);
+  
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="border-pink-500/20">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Categorias</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-display text-gold">{adminStore.categories.length}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-pink-500/20">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Nominees</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-display text-gold">{totalNominees}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-pink-500/20">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Última Atualização</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-display text-gold">Hoje</p>
+          </CardContent>
+        </Card>
+      </div>
 
-  const category = selectedCategory 
-    ? data.categories.find(c => c.slug === selectedCategory) 
-    : null;
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle className="text-lg font-display text-gold">Bem-vindo ao Painel Admin!</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            Use o menu lateral para navegar entre as diferentes seções e editar o conteúdo do site.
+          </p>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>✨ <strong className="text-foreground">Categorias:</strong> Adicione, edite e remova nominees, fotos, vídeos e textos</li>
+            <li>⚙️ <strong className="text-foreground">Configurações:</strong> Personalize nome, logo, header e footer do site</li>
+            <li>🎨 <strong className="text-foreground">Cores:</strong> Customize o tema e paleta de cores</li>
+            <li>📝 <strong className="text-foreground">Conteúdo:</strong> Exporte backups e restaure dados padrão</li>
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Seção: Categorias
+function CategoriesSection({ adminStore }: { adminStore: ReturnType<typeof useAdminStore> }) {
+  const [selectedCategory, setSelectedCategory] = useState(adminStore.categories[0]?.slug || "");
+  const [editingNominee, setEditingNominee] = useState<{ index: number; data: Nominee } | null>(null);
+  const [isAddingNew, setIsAddingNew] = useState(false);
+
+  const category = adminStore.categories.find(c => c.slug === selectedCategory);
+
+  const handleSaveNominee = (nominee: Nominee, index?: number) => {
+    if (index !== undefined) {
+      adminStore.updateNominee(selectedCategory, index, nominee);
+    } else {
+      adminStore.addNominee(selectedCategory, nominee);
+    }
+    setEditingNominee(null);
+    setIsAddingNew(false);
+  };
 
   return (
     <div className="space-y-6">
-      {/* Seletor de Categoria */}
-      <div className="bg-card p-6 rounded-lg border border-border">
-        <h3 className="text-lg font-display text-gold mb-4">Selecione uma Categoria</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {data.categories.map((cat) => (
-            <button
-              key={cat.slug}
-              onClick={() => setSelectedCategory(cat.slug)}
-              className={`
-                p-4 rounded-lg border-2 transition-all duration-300 text-left
-                ${selectedCategory === cat.slug 
-                  ? "border-pink-400 bg-pink-500/10 shadow-[0_0_20px_rgba(236,72,153,0.3)]" 
-                  : "border-border hover:border-pink-400/50 hover:bg-pink-500/5"
-                }
-              `}
-            >
-              <h4 className="font-display text-sm text-gold">{cat.title}</h4>
-              <p className="text-xs text-muted-foreground mt-1">{cat.nominees.length} itens</p>
-            </button>
-          ))}
-        </div>
-      </div>
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle className="text-lg font-display text-gold">Selecione uma Categoria</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {adminStore.categories.map(cat => (
+                <SelectItem key={cat.slug} value={cat.slug}>
+                  {cat.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
-      {/* Editor da Categoria Selecionada */}
       {category && (
-        <div className="space-y-6">
-          {/* Editar Info da Categoria */}
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <h3 className="text-lg font-display text-gold mb-4">Informações da Categoria</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Título</label>
-                <input
-                  type="text"
-                  value={category.title}
-                  onChange={(e) => updateCategory(category.slug, { title: e.target.value })}
-                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20 outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground block mb-2">Subtítulo (Kicker)</label>
-                <input
-                  type="text"
-                  value={category.kicker}
-                  onChange={(e) => updateCategory(category.slug, { kicker: e.target.value })}
-                  className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20 outline-none"
-                />
-              </div>
+        <Card className="border-border">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg font-display text-gold">{category.title}</CardTitle>
+              <CardDescription>{category.kicker}</CardDescription>
             </div>
-          </div>
-
-          {/* Lista de Nominees */}
-          <div className="bg-card p-6 rounded-lg border border-border">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-display text-gold">Nominees / Indicados</h3>
-              <Button
-                onClick={() => {
-                  const newNominee = {
-                    name: "Novo Item",
-                    sub: "Adicione uma descrição",
-                    img: "/assets/placeholder.jpg",
-                    rank: `${category.nominees.length + 1}º`,
-                  };
-                  addNominee(category.slug, newNominee);
-                }}
-                className="bg-pink-500 hover:bg-pink-600"
-              >
-                Adicionar Novo
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              {category.nominees.map((nominee) => (
-                <div
-                  key={nominee.name}
-                  className="bg-background p-4 rounded-lg border border-border hover:border-pink-400/50 transition-all"
-                >
-                  {editingNominee === nominee.name ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-xs font-medium text-muted-foreground block mb-1">Nome</label>
-                          <input
-                            type="text"
-                            value={nominee.name}
-                            onChange={(e) => updateNominee(category.slug, nominee.name, { name: e.target.value })}
-                            className="w-full px-3 py-2 bg-panel border border-border rounded text-sm focus:border-pink-400 outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-muted-foreground block mb-1">Subtítulo</label>
-                          <input
-                            type="text"
-                            value={nominee.sub}
-                            onChange={(e) => updateNominee(category.slug, nominee.name, { sub: e.target.value })}
-                            className="w-full px-3 py-2 bg-panel border border-border rounded text-sm focus:border-pink-400 outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-muted-foreground block mb-1">URL da Imagem</label>
-                          <input
-                            type="text"
-                            value={nominee.img}
-                            onChange={(e) => updateNominee(category.slug, nominee.name, { img: e.target.value })}
-                            className="w-full px-3 py-2 bg-panel border border-border rounded text-sm focus:border-pink-400 outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-medium text-muted-foreground block mb-1">Ranking</label>
-                          <input
-                            type="text"
-                            value={nominee.rank}
-                            onChange={(e) => updateNominee(category.slug, nominee.name, { rank: e.target.value })}
-                            className="w-full px-3 py-2 bg-panel border border-border rounded text-sm focus:border-pink-400 outline-none"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="text-xs font-medium text-muted-foreground block mb-1">URL do Vídeo (YouTube Embed)</label>
-                        <input
-                          type="text"
-                          value={nominee.videoUrl || ""}
-                          onChange={(e) => updateNominee(category.slug, nominee.name, { videoUrl: e.target.value })}
-                          placeholder="https://www.youtube.com/embed/..."
-                          className="w-full px-3 py-2 bg-panel border border-border rounded text-sm focus:border-pink-400 outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-medium text-muted-foreground block mb-1">Detalhes</label>
-                        <textarea
-                          value={nominee.details || ""}
-                          onChange={(e) => updateNominee(category.slug, nominee.name, { details: e.target.value })}
-                          rows={3}
-                          className="w-full px-3 py-2 bg-panel border border-border rounded text-sm focus:border-pink-400 outline-none resize-none"
-                        />
-                      </div>
-
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => setEditingNominee(null)}
-                          className="bg-pink-500 hover:bg-pink-600"
-                        >
-                          Salvar
-                        </Button>
-                        <Button
-                          onClick={() => setEditingNominee(null)}
-                          variant="outline"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            if (confirm("Tem certeza que deseja deletar?")) {
-                              deleteNominee(category.slug, nominee.name);
-                              setEditingNominee(null);
-                            }
-                          }}
-                          variant="destructive"
-                          className="ml-auto"
-                        >
-                          Deletar
-                        </Button>
-                      </div>
+            <Button 
+              onClick={() => setIsAddingNew(true)}
+              className="bg-pink-500 hover:bg-pink-600"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Nominee
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {category.nominees.map((nominee, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 bg-panel rounded-lg border border-pink-500/20">
+                  <div className="flex items-center gap-4">
+                    <img src={nominee.img} alt={nominee.name} className="w-16 h-24 object-cover rounded" />
+                    <div>
+                      <h3 className="font-display text-lg text-gold">{nominee.name}</h3>
+                      <p className="text-sm text-muted-foreground">{nominee.sub}</p>
+                      <p className="text-xs text-pink-400 mt-1">Rank: {nominee.rank}</p>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={nominee.img}
-                        alt={nominee.name}
-                        className="w-16 h-20 object-cover rounded"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-display text-gold">{nominee.name}</h4>
-                        <p className="text-sm text-muted-foreground">{nominee.sub}</p>
-                        <p className="text-xs text-pink-400 mt-1">Rank: {nominee.rank}</p>
-                      </div>
-                      <Button
-                        onClick={() => setEditingNominee(nominee.name)}
-                        variant="outline"
-                        size="sm"
-                      >
-                        Editar
-                      </Button>
-                    </div>
-                  )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditingNominee({ index: idx, data: nominee })}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        if (confirm(`Deletar ${nominee.name}?`)) {
+                          adminStore.deleteNominee(selectedCategory, idx);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Dialog para editar/adicionar nominee */}
+      <NomineeDialog
+        open={editingNominee !== null || isAddingNew}
+        onClose={() => {
+          setEditingNominee(null);
+          setIsAddingNew(false);
+        }}
+        nominee={editingNominee?.data}
+        onSave={(nominee) => handleSaveNominee(nominee, editingNominee?.index)}
+      />
+    </div>
+  );
+}
+
+// Dialog para editar Nominee
+function NomineeDialog({ 
+  open, 
+  onClose, 
+  nominee, 
+  onSave 
+}: { 
+  open: boolean; 
+  onClose: () => void; 
+  nominee?: Nominee;
+  onSave: (nominee: Nominee) => void;
+}) {
+  const [formData, setFormData] = useState<Nominee>(
+    nominee || { name: "", sub: "", img: "", rank: "1º", videoUrl: "", details: "", gallery: [] }
+  );
+  const [imagePreview, setImagePreview] = useState("");
+  const [videoPreview, setVideoPreview] = useState("");
+
+  useEffect(() => {
+    if (nominee) {
+      setFormData(nominee);
+      setImagePreview(nominee.img);
+      setVideoPreview(nominee.videoUrl || "");
+    } else {
+      setFormData({ name: "", sub: "", img: "", rank: "1º", videoUrl: "", details: "", gallery: [] });
+      setImagePreview("");
+      setVideoPreview("");
+    }
+  }, [nominee, open]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Verificar se é imagem
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor, selecione apenas arquivos de imagem!');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setImagePreview(result);
+      setFormData({ ...formData, img: result });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleVideoUrlChange = (url: string) => {
+    setFormData({ ...formData, videoUrl: url });
+    
+    // Extrair ID do YouTube e criar embed URL
+    let embedUrl = "";
+    if (url) {
+      // Suporta vários formatos de URL do YouTube
+      const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?\/\s]+)/,
+        /youtube\.com\/shorts\/([^&?\/\s]+)/
+      ];
+      
+      for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+          embedUrl = `https://www.youtube.com/embed/${match[1]}`;
+          break;
+        }
+      }
+      
+      // Se já for embed URL, usar direto
+      if (url.includes('youtube.com/embed/')) {
+        embedUrl = url;
+      }
+    }
+    
+    setVideoPreview(embedUrl);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-display text-gold">
+            {nominee ? "Editar Nominee" : "Adicionar Nominee"}
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
           </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="sub">Subtítulo</Label>
+            <Input
+              id="sub"
+              value={formData.sub}
+              onChange={(e) => setFormData({ ...formData, sub: e.target.value })}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Imagem</Label>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Input
+                  id="img"
+                  value={formData.img}
+                  onChange={(e) => {
+                    setFormData({ ...formData, img: e.target.value });
+                    setImagePreview(e.target.value);
+                  }}
+                  placeholder="/assets/model-1.jpg ou cole URL"
+                />
+              </div>
+              <div>
+                <Label htmlFor="img-upload" className="cursor-pointer">
+                  <div className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-md flex items-center gap-2 transition-colors">
+                    <Upload className="w-4 h-4" />
+                    Upload
+                  </div>
+                </Label>
+                <Input
+                  id="img-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+            </div>
+            {/* Preview da Imagem */}
+            {imagePreview && (
+              <div className="mt-3 border border-pink-500/30 rounded-lg overflow-hidden">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="w-full h-48 object-cover"
+                  onError={() => setImagePreview("")}
+                />
+              </div>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="rank">Rank</Label>
+            <Select value={formData.rank} onValueChange={(val) => setFormData({ ...formData, rank: val })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1º">1º</SelectItem>
+                <SelectItem value="2º">2º</SelectItem>
+                <SelectItem value="3º">3º</SelectItem>
+                <SelectItem value="4º">4º</SelectItem>
+                <SelectItem value="5º">5º</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="videoUrl">URL do Vídeo do YouTube (opcional)</Label>
+            <Input
+              id="videoUrl"
+              value={formData.videoUrl || ""}
+              onChange={(e) => handleVideoUrlChange(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=... ou youtu.be/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Cole qualquer link do YouTube (watch, shorts, youtu.be)
+            </p>
+            {/* Preview do Vídeo */}
+            {videoPreview && (
+              <div className="mt-3 border border-pink-500/30 rounded-lg overflow-hidden">
+                <div className="relative aspect-video">
+                  <iframe
+                    src={videoPreview}
+                    title="Preview do Vídeo"
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="details">Detalhes (opcional)</Label>
+            <Textarea
+              id="details"
+              value={formData.details || ""}
+              onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+              rows={4}
+              placeholder="Descrição completa do nominee..."
+            />
+          </div>
+          
+          <div className="flex gap-3 pt-4">
+            <Button type="submit" className="flex-1 bg-pink-500 hover:bg-pink-600">
+              Salvar
+            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Seção: Configurações do Site
+function SiteConfigSection({ adminStore }: { adminStore: ReturnType<typeof useAdminStore> }) {
+  const [config, setConfig] = useState(adminStore.siteConfig);
+
+  const handleSave = () => {
+    adminStore.updateSiteConfig(config);
+    alert("Configurações salvas com sucesso!");
+  };
+
+  return (
+    <Card className="border-border">
+      <CardHeader>
+        <CardTitle className="text-lg font-display text-gold">Configurações do Site</CardTitle>
+        <CardDescription>Personalize nome, logo, header e footer</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Nome do Site</Label>
+          <Input
+            value={config.siteName}
+            onChange={(e) => setConfig({ ...config, siteName: e.target.value })}
+          />
         </div>
+        <div className="space-y-2">
+          <Label>Tagline</Label>
+          <Input
+            value={config.siteTagline}
+            onChange={(e) => setConfig({ ...config, siteTagline: e.target.value })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Texto do Logo</Label>
+          <Input
+            value={config.logoText}
+            onChange={(e) => setConfig({ ...config, logoText: e.target.value })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Texto do Rodapé</Label>
+          <Textarea
+            value={config.footerText}
+            onChange={(e) => setConfig({ ...config, footerText: e.target.value })}
+            rows={3}
+          />
+        </div>
+        <Button onClick={handleSave} className="w-full bg-pink-500 hover:bg-pink-600">
+          Salvar Configurações
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Seção: Cores
+function ColorsSection({ adminStore }: { adminStore: ReturnType<typeof useAdminStore> }) {
+  const [colors, setColors] = useState(adminStore.siteConfig.colors);
+  const [activeTab, setActiveTab] = useState<"principais" | "surfaces" | "texto" | "components">("principais");
+
+  const handleSave = () => {
+    adminStore.updateSiteConfig({ colors });
+    alert("Cores salvas com sucesso! Recarregue a página para ver as mudanças.");
+  };
+
+  const handleReset = () => {
+    if (confirm("Resetar todas as cores para o padrão?")) {
+      const defaultColors = {
+        primary: "oklch(0.7 0.25 350)",
+        secondary: "oklch(0.65 0.2 280)",
+        accent: "oklch(0.82 0.15 85)",
+        gold: "oklch(0.85 0.12 85)",
+        goldSoft: "oklch(0.82 0.09 80)",
+        pinkGlow: "oklch(0.75 0.28 350)",
+        pinkHover: "oklch(0.7 0.25 350)",
+        background: "oklch(0.15 0.01 270)",
+        panel: "oklch(0.18 0.01 270)",
+        card: "oklch(0.20 0.01 270)",
+        sidebar: "oklch(0.17 0.01 270)",
+        foreground: "oklch(0.98 0 0)",
+        muted: "oklch(0.65 0.01 270)",
+        border: "oklch(0.30 0.02 270)",
+        headerBg: "oklch(0.7 0.25 350)",
+        headerText: "oklch(0.98 0 0)",
+        footerBg: "oklch(0.18 0.01 270)",
+        footerText: "oklch(0.65 0.01 270)",
+        buttonPrimary: "oklch(0.7 0.25 350)",
+        buttonSecondary: "oklch(0.85 0.12 85)",
+        buttonHover: "oklch(0.65 0.28 350)",
+        success: "oklch(0.65 0.2 145)",
+        warning: "oklch(0.75 0.15 85)",
+        error: "oklch(0.65 0.25 25)",
+        info: "oklch(0.65 0.2 240)",
+      };
+      setColors(defaultColors);
+    }
+  };
+
+  const tabs = [
+    { id: "principais" as const, label: "Cores Principais", icon: Palette },
+    { id: "surfaces" as const, label: "Superfícies & BG", icon: LayoutDashboard },
+    { id: "texto" as const, label: "Texto & Bordas", icon: FileText },
+    { id: "components" as const, label: "Componentes", icon: Settings },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle className="text-lg font-display text-gold">Editor de Cores e Tema</CardTitle>
+          <CardDescription>Personalize todas as cores do site - estilo WordPress</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Tabs */}
+          <div className="flex gap-2 border-b border-border pb-4">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-lg transition-all
+                    ${activeTab === tab.id
+                      ? "bg-pink-500 text-white"
+                      : "bg-panel text-muted-foreground hover:bg-pink-500/10 hover:text-pink-300"
+                    }
+                  `}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="text-sm font-medium">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Cores Principais */}
+          {activeTab === "principais" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ColorPicker
+                label="Cor Primária"
+                description="Cor principal do site (rosa/pink)"
+                value={colors.primary}
+                onChange={(val) => setColors({ ...colors, primary: val })}
+              />
+              <ColorPicker
+                label="Cor Secundária"
+                description="Cor secundária"
+                value={colors.secondary}
+                onChange={(val) => setColors({ ...colors, secondary: val })}
+              />
+              <ColorPicker
+                label="Cor de Destaque"
+                description="Cor de destaque/accent"
+                value={colors.accent}
+                onChange={(val) => setColors({ ...colors, accent: val })}
+              />
+              <ColorPicker
+                label="Dourado Principal"
+                description="Cor dourada da marca"
+                value={colors.gold}
+                onChange={(val) => setColors({ ...colors, gold: val })}
+              />
+              <ColorPicker
+                label="Dourado Suave"
+                description="Dourado mais claro"
+                value={colors.goldSoft}
+                onChange={(val) => setColors({ ...colors, goldSoft: val })}
+              />
+              <ColorPicker
+                label="Rosa Neon"
+                description="Rosa brilhante (glow)"
+                value={colors.pinkGlow}
+                onChange={(val) => setColors({ ...colors, pinkGlow: val })}
+              />
+              <ColorPicker
+                label="Rosa Hover"
+                description="Rosa para hover/interação"
+                value={colors.pinkHover}
+                onChange={(val) => setColors({ ...colors, pinkHover: val })}
+              />
+            </div>
+          )}
+
+          {/* Superfícies & Backgrounds */}
+          {activeTab === "surfaces" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ColorPicker
+                label="Background Principal"
+                description="Fundo do site"
+                value={colors.background}
+                onChange={(val) => setColors({ ...colors, background: val })}
+              />
+              <ColorPicker
+                label="Painel"
+                description="Cor dos painéis"
+                value={colors.panel}
+                onChange={(val) => setColors({ ...colors, panel: val })}
+              />
+              <ColorPicker
+                label="Cards"
+                description="Fundo dos cards"
+                value={colors.card}
+                onChange={(val) => setColors({ ...colors, card: val })}
+              />
+              <ColorPicker
+                label="Sidebar"
+                description="Fundo da barra lateral"
+                value={colors.sidebar}
+                onChange={(val) => setColors({ ...colors, sidebar: val })}
+              />
+              <ColorPicker
+                label="Header - Fundo"
+                description="Cor de fundo do cabeçalho"
+                value={colors.headerBg}
+                onChange={(val) => setColors({ ...colors, headerBg: val })}
+              />
+              <ColorPicker
+                label="Header - Texto"
+                description="Cor do texto do cabeçalho"
+                value={colors.headerText}
+                onChange={(val) => setColors({ ...colors, headerText: val })}
+              />
+              <ColorPicker
+                label="Footer - Fundo"
+                description="Cor de fundo do rodapé"
+                value={colors.footerBg}
+                onChange={(val) => setColors({ ...colors, footerBg: val })}
+              />
+              <ColorPicker
+                label="Footer - Texto"
+                description="Cor do texto do rodapé"
+                value={colors.footerText}
+                onChange={(val) => setColors({ ...colors, footerText: val })}
+              />
+            </div>
+          )}
+
+          {/* Texto & Bordas */}
+          {activeTab === "texto" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ColorPicker
+                label="Texto Principal"
+                description="Cor do texto principal"
+                value={colors.foreground}
+                onChange={(val) => setColors({ ...colors, foreground: val })}
+              />
+              <ColorPicker
+                label="Texto Muted"
+                description="Texto secundário/esmaecido"
+                value={colors.muted}
+                onChange={(val) => setColors({ ...colors, muted: val })}
+              />
+              <ColorPicker
+                label="Bordas"
+                description="Cor das bordas"
+                value={colors.border}
+                onChange={(val) => setColors({ ...colors, border: val })}
+              />
+            </div>
+          )}
+
+          {/* Componentes & Estados */}
+          {activeTab === "components" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ColorPicker
+                label="Botão Primário"
+                description="Cor dos botões principais"
+                value={colors.buttonPrimary}
+                onChange={(val) => setColors({ ...colors, buttonPrimary: val })}
+              />
+              <ColorPicker
+                label="Botão Secundário"
+                description="Cor dos botões secundários"
+                value={colors.buttonSecondary}
+                onChange={(val) => setColors({ ...colors, buttonSecondary: val })}
+              />
+              <ColorPicker
+                label="Botão Hover"
+                description="Cor hover dos botões"
+                value={colors.buttonHover}
+                onChange={(val) => setColors({ ...colors, buttonHover: val })}
+              />
+              <ColorPicker
+                label="Sucesso"
+                description="Cor de sucesso (verde)"
+                value={colors.success}
+                onChange={(val) => setColors({ ...colors, success: val })}
+              />
+              <ColorPicker
+                label="Aviso"
+                description="Cor de aviso (amarelo)"
+                value={colors.warning}
+                onChange={(val) => setColors({ ...colors, warning: val })}
+              />
+              <ColorPicker
+                label="Erro"
+                description="Cor de erro (vermelho)"
+                value={colors.error}
+                onChange={(val) => setColors({ ...colors, error: val })}
+              />
+              <ColorPicker
+                label="Informação"
+                description="Cor de informação (azul)"
+                value={colors.info}
+                onChange={(val) => setColors({ ...colors, info: val })}
+              />
+            </div>
+          )}
+
+          {/* Botões de ação */}
+          <div className="flex gap-3 pt-6 border-t border-border">
+            <Button onClick={handleSave} className="flex-1 bg-pink-500 hover:bg-pink-600">
+              <Download className="w-4 h-4 mr-2" />
+              Salvar Todas as Cores
+            </Button>
+            <Button onClick={handleReset} variant="outline" className="border-pink-500/30">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Resetar Padrão
+            </Button>
+          </div>
+
+          {/* Info */}
+          <div className="bg-panel p-4 rounded-lg border border-pink-500/20">
+            <p className="text-sm text-muted-foreground">
+              💡 <strong className="text-foreground">Dica:</strong> Use o formato{" "}
+              <code className="text-pink-400 bg-background px-2 py-1 rounded">oklch(L C H)</code> para cores.
+              Exemplo: <code className="text-pink-400 bg-background px-2 py-1 rounded">oklch(0.7 0.25 350)</code>
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              L = Luminosidade (0-1) | C = Chroma/saturação (0-0.4) | H = Matiz/hue (0-360)
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Componente ColorPicker
+function ColorPicker({
+  label,
+  description,
+  value,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <Label className="text-foreground">{label}</Label>
+          <p className="text-xs text-muted-foreground">{description}</p>
+        </div>
+        <div
+          className="w-12 h-12 rounded-lg border-2 border-border shadow-lg"
+          style={{ background: value }}
+        />
+      </div>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="oklch(0.7 0.25 350)"
+        className="font-mono text-sm"
+      />
+    </div>
+  );
+}
+
+// Seção: Conteúdo (Export/Import/Reset + Editor de Conteúdos)
+function ContentSection({ adminStore }: { adminStore: ReturnType<typeof useAdminStore> }) {
+  const [activeTab, setActiveTab] = useState<"hero" | "ticker" | "stats" | "stories" | "backup">("hero");
+  const [editingTickerIndex, setEditingTickerIndex] = useState<number | null>(null);
+  const [editingStatIndex, setEditingStatIndex] = useState<number | null>(null);
+
+  const handleExport = () => {
+    const data = adminStore.exportData();
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `runway-wavy-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const success = adminStore.importData(content);
+      if (success) {
+        alert("Dados importados com sucesso!");
+      } else {
+        alert("Erro ao importar dados!");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleReset = () => {
+    if (confirm("Isso irá resetar TODOS os dados para o padrão. Deseja continuar?")) {
+      adminStore.resetToDefaults();
+      alert("Dados resetados com sucesso!");
+    }
+  };
+
+  const tabs = [
+    { id: "hero" as const, label: "Hero Section", icon: LayoutDashboard },
+    { id: "ticker" as const, label: "Ticker/Ranking", icon: Trophy },
+    { id: "stats" as const, label: "Estatísticas", icon: FileText },
+    { id: "stories" as const, label: "Stories/Categorias", icon: Image },
+    { id: "backup" as const, label: "Backup/Reset", icon: Download },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle className="text-lg font-display text-gold">Editor de Conteúdo</CardTitle>
+          <CardDescription>Edite todos os textos e conteúdos do site</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Tabs */}
+          <div className="flex flex-wrap gap-2 border-b border-border pb-4">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm
+                    ${activeTab === tab.id
+                      ? "bg-pink-500 text-white"
+                      : "bg-panel text-muted-foreground hover:bg-pink-500/10 hover:text-pink-300"
+                    }
+                  `}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="font-medium">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Hero Section Editor */}
+          {activeTab === "hero" && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Texto Superior</Label>
+                <Input
+                  value={adminStore.siteConfig.heroSection.topText}
+                  onChange={(e) =>
+                    adminStore.updateSiteConfig({
+                      heroSection: { ...adminStore.siteConfig.heroSection, topText: e.target.value },
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Título Principal</Label>
+                <Input
+                  value={adminStore.siteConfig.heroSection.mainTitle}
+                  onChange={(e) =>
+                    adminStore.updateSiteConfig({
+                      heroSection: { ...adminStore.siteConfig.heroSection, mainTitle: e.target.value },
+                    })
+                  }
+                  className="text-2xl font-display"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Texto Inferior</Label>
+                <Input
+                  value={adminStore.siteConfig.heroSection.bottomText}
+                  onChange={(e) =>
+                    adminStore.updateSiteConfig({
+                      heroSection: { ...adminStore.siteConfig.heroSection, bottomText: e.target.value },
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>URL da Imagem de Fundo</Label>
+                <Input
+                  value={adminStore.siteConfig.heroSection.backgroundImage}
+                  onChange={(e) =>
+                    adminStore.updateSiteConfig({
+                      heroSection: { ...adminStore.siteConfig.heroSection, backgroundImage: e.target.value },
+                    })
+                  }
+                  placeholder="/assets/hero-runway.jpg"
+                />
+              </div>
+              <Button
+                onClick={() => alert("Hero Section salva automaticamente!")}
+                className="w-full bg-pink-500 hover:bg-pink-600"
+              >
+                ✓ Alterações Salvas Automaticamente
+              </Button>
+            </div>
+          )}
+
+          {/* Ticker Editor */}
+          {activeTab === "ticker" && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Título do Ticker</Label>
+                <Input
+                  value={adminStore.siteConfig.ticker.title}
+                  onChange={(e) =>
+                    adminStore.updateSiteConfig({
+                      ticker: { ...adminStore.siteConfig.ticker, title: e.target.value },
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Subtítulo do Ticker</Label>
+                <Input
+                  value={adminStore.siteConfig.ticker.subtitle}
+                  onChange={(e) =>
+                    adminStore.updateSiteConfig({
+                      ticker: { ...adminStore.siteConfig.ticker, subtitle: e.target.value },
+                    })
+                  }
+                />
+              </div>
+
+              <div className="border-t border-border pt-4 mt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-display text-gold">Items do Ticker</h3>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      adminStore.addTickerItem({ pos: "6º", pct: "50%", cat: "NOVA CATEGORIA", name: "NOME", sub: "Sub" })
+                    }
+                    className="bg-pink-500 hover:bg-pink-600"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Item
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {adminStore.siteConfig.ticker.items.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-3 bg-panel rounded-lg border border-pink-500/20">
+                      <span className="text-sm font-bold text-gold">{item.pos}</span>
+                      <div className="flex-1">
+                        <div className="font-display text-sm">{item.name}</div>
+                        <div className="text-xs text-muted-foreground">{item.cat} • {item.pct}</div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingTickerIndex(idx)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          if (confirm("Deletar este item?")) {
+                            adminStore.deleteTickerItem(idx);
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Stats Editor */}
+          {activeTab === "stats" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-gold">Estatísticas</h3>
+                <Button
+                  size="sm"
+                  onClick={() => adminStore.addStat({ n: "0", label: "NOVA STAT" })}
+                  className="bg-pink-500 hover:bg-pink-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Estatística
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {adminStore.siteConfig.statsSection.stats.map((stat, idx) => (
+                  <div key={idx} className="p-4 bg-panel rounded-lg border border-pink-500/20">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-display text-2xl text-gold">{stat.n}</span>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingStatIndex(idx)}
+                        >
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm("Deletar esta estatística?")) {
+                              adminStore.deleteStat(idx);
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Stories/Categorias Editor */}
+          {activeTab === "stories" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-display text-gold">Stories/Círculos de Categorias</h3>
+                  <p className="text-sm text-muted-foreground">Adicione ou remova categorias que aparecem nos círculos</p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const newCategory: Category = {
+                      slug: "nova-categoria",
+                      circle: "/assets/model-1.jpg",
+                      short: "NOVA\nCATEGORIA",
+                      title: "NOVA CATEGORIA",
+                      kicker: "Descrição da categoria",
+                      label: "INDICADA",
+                      nominees: [],
+                    };
+                    adminStore.addCategory(newCategory);
+                  }}
+                  className="bg-pink-500 hover:bg-pink-600"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Categoria
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {adminStore.categories.map((cat) => (
+                  <div key={cat.slug} className="p-4 bg-panel rounded-lg border border-pink-500/20 text-center">
+                    <img src={cat.circle} alt={cat.title} className="w-20 h-20 rounded-full mx-auto mb-2 object-cover" />
+                    <h4 className="font-display text-sm text-gold">{cat.title}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">{cat.nominees.length} nominees</p>
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => {
+                          const newTitle = prompt("Novo título:", cat.title);
+                          if (newTitle) {
+                            adminStore.updateCategory(cat.slug, { title: newTitle });
+                          }
+                        }}
+                      >
+                        <Edit className="w-3 h-3 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          if (confirm(`Deletar categoria "${cat.title}"?`)) {
+                            adminStore.deleteCategory(cat.slug);
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Backup/Reset */}
+          {activeTab === "backup" && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-display text-gold mb-2">Backup de Dados</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Exporte todos os dados para backup ou importe dados salvos anteriormente
+                </p>
+                <div className="space-y-3">
+                  <Button onClick={handleExport} className="w-full" variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar Backup (JSON)
+                  </Button>
+                  <div>
+                    <Label htmlFor="import-file" className="cursor-pointer">
+                      <div className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-md hover:bg-accent transition-colors">
+                        <Upload className="w-4 h-4" />
+                        <span>Importar Backup</span>
+                      </div>
+                    </Label>
+                    <Input
+                      id="import-file"
+                      type="file"
+                      accept=".json"
+                      onChange={handleImport}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-destructive/50 pt-4 mt-6">
+                <h3 className="font-display text-destructive mb-2">Zona de Perigo</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Restaurar todos os dados para o padrão original (irreversível!)
+                </p>
+                <Button onClick={handleReset} variant="destructive" className="w-full">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Restaurar Dados Padrão
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Dialogs para editar ticker e stats */}
+      {editingTickerIndex !== null && (
+        <TickerItemDialog
+          item={adminStore.siteConfig.ticker.items[editingTickerIndex]}
+          onSave={(updates) => {
+            adminStore.updateTickerItem(editingTickerIndex, updates);
+            setEditingTickerIndex(null);
+          }}
+          onClose={() => setEditingTickerIndex(null)}
+        />
+      )}
+
+      {editingStatIndex !== null && (
+        <StatDialog
+          stat={adminStore.siteConfig.statsSection.stats[editingStatIndex]}
+          onSave={(updates) => {
+            adminStore.updateStat(editingStatIndex, updates);
+            setEditingStatIndex(null);
+          }}
+          onClose={() => setEditingStatIndex(null)}
+        />
       )}
     </div>
   );
 }
 
-function SiteConfigSection() {
-  const { data, updateSiteConfig } = useAdminStore();
-  const config = data.siteConfig;
+// Dialog para editar item do Ticker
+function TickerItemDialog({
+  item,
+  onSave,
+  onClose,
+}: {
+  item: { pos: string; pct: string; cat: string; name: string; sub: string };
+  onSave: (updates: Partial<typeof item>) => void;
+  onClose: () => void;
+}) {
+  const [formData, setFormData] = useState(item);
 
   return (
-    <div className="space-y-6">
-      <div className="bg-card p-6 rounded-lg border border-border">
-        <h3 className="text-lg font-display text-gold mb-6">Configurações Gerais do Site</h3>
-        
-        <div className="space-y-6">
-          {/* Nome e Descrição */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="siteName" className="text-foreground">Nome do Site</Label>
-              <Input
-                id="siteName"
-                value={config.siteName}
-                onChange={(e) => updateSiteConfig({ siteName: e.target.value })}
-                className="mt-2"
-              />
-            </div>
-            <div>
-              <Label htmlFor="siteDescription" className="text-foreground">Descrição</Label>
-              <Input
-                id="siteDescription"
-                value={config.siteDescription}
-                onChange={(e) => updateSiteConfig({ siteDescription: e.target.value })}
-                className="mt-2"
-              />
-            </div>
-          </div>
-
-          {/* Logo e Favicon */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="logo" className="text-foreground">Texto do Logo</Label>
-              <Input
-                id="logo"
-                value={config.logo}
-                onChange={(e) => updateSiteConfig({ logo: e.target.value })}
-                className="mt-2"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Texto exibido no header</p>
-            </div>
-            <div>
-              <Label htmlFor="favicon" className="text-foreground">Favicon URL</Label>
-              <Input
-                id="favicon"
-                value={config.favicon}
-                onChange={(e) => updateSiteConfig({ favicon: e.target.value })}
-                className="mt-2"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Caminho do ícone do site</p>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div>
-            <Label htmlFor="footerText" className="text-foreground">Texto do Rodapé</Label>
-            <textarea
-              id="footerText"
-              value={config.footerText}
-              onChange={(e) => updateSiteConfig({ footerText: e.target.value })}
-              rows={3}
-              className="w-full mt-2 px-4 py-2 bg-background border border-border rounded-lg focus:border-pink-400 focus:ring-2 focus:ring-pink-400/20 outline-none resize-none"
-            />
-          </div>
-
-          {/* Cor do Header */}
-          <div>
-            <Label htmlFor="headerBg" className="text-foreground">Cor de Fundo do Header</Label>
-            <div className="flex gap-4 mt-2">
-              <Input
-                id="headerBg"
-                value={config.headerBg}
-                onChange={(e) => updateSiteConfig({ headerBg: e.target.value })}
-                placeholder="oklch(0.66 0.24 350)"
-              />
-              <div
-                className="w-16 h-10 rounded border-2 border-border"
-                style={{ backgroundColor: config.headerBg }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Use formato OKLCH ou hexadecimal</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Preview */}
-      <div className="bg-card p-6 rounded-lg border border-border">
-        <h3 className="text-lg font-display text-gold mb-4">Preview</h3>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-display text-gold">Editar Item do Ticker</DialogTitle>
+        </DialogHeader>
         <div className="space-y-4">
-          <div 
-            className="p-6 rounded-lg text-white"
-            style={{ backgroundColor: config.headerBg }}
-          >
-            <p className="font-display text-2xl">{config.logo}</p>
-            <p className="text-xs opacity-70">{config.siteDescription}</p>
-          </div>
-          <div className="bg-panel p-4 rounded-lg text-center text-xs text-muted-foreground">
-            {config.footerText}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MenuSection() {
-  const { data } = useAdminStore();
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-card p-6 rounded-lg border border-border">
-        <h3 className="text-lg font-display text-gold mb-4">Itens do Menu</h3>
-        <p className="text-muted-foreground mb-6">
-          O menu é gerado automaticamente com base nas categorias criadas.
-        </p>
-
-        <div className="space-y-3">
-          {data.categories.map((cat) => (
-            <div
-              key={cat.slug}
-              className="flex items-center gap-4 p-4 bg-background rounded-lg border border-border"
-            >
-              <div className="w-12 h-12 rounded-lg overflow-hidden">
-                <img src={cat.circle} alt={cat.title} className="w-full h-full object-cover" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-display text-gold">{cat.title}</h4>
-                <p className="text-xs text-muted-foreground">/categoria/{cat.slug}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-pink-400 bg-pink-500/10 px-3 py-1 rounded-full">
-                  {cat.nominees.length} itens
-                </span>
-              </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Posição</Label>
+              <Input value={formData.pos} onChange={(e) => setFormData({ ...formData, pos: e.target.value })} />
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-card p-6 rounded-lg border border-pink-500/20">
-        <h3 className="text-lg font-display text-gold mb-2">💡 Dica</h3>
-        <p className="text-sm text-muted-foreground">
-          Para adicionar novos itens ao menu, crie novas categorias na seção <strong>Categorias</strong>.
-          O menu lateral será atualizado automaticamente.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ColorsSection() {
-  const { data, updateSiteConfig } = useAdminStore();
-  const config = data.siteConfig;
-
-  const colorPresets = [
-    { name: "Rosa Pink", primary: "oklch(0.66 0.24 350)", secondary: "oklch(0.27 0.02 330)", accent: "oklch(0.84 0.15 88)" },
-    { name: "Azul Royal", primary: "oklch(0.45 0.31 264)", secondary: "oklch(0.20 0.04 264)", accent: "oklch(0.75 0.25 264)" },
-    { name: "Verde Esmeralda", primary: "oklch(0.50 0.20 160)", secondary: "oklch(0.25 0.03 160)", accent: "oklch(0.70 0.15 140)" },
-    { name: "Roxo Místico", primary: "oklch(0.55 0.25 300)", secondary: "oklch(0.22 0.04 300)", accent: "oklch(0.75 0.20 285)" },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-card p-6 rounded-lg border border-border">
-        <h3 className="text-lg font-display text-gold mb-6">Esquema de Cores</h3>
-
-        {/* Paletas Predefinidas */}
-        <div className="mb-8">
-          <Label className="text-foreground mb-3 block">Paletas Predefinidas</Label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {colorPresets.map((preset) => (
-              <button
-                key={preset.name}
-                onClick={() => updateSiteConfig({
-                  primaryColor: preset.primary,
-                  secondaryColor: preset.secondary,
-                  accentColor: preset.accent,
-                })}
-                className="p-4 rounded-lg border-2 border-border hover:border-pink-400 transition-all"
-              >
-                <div className="flex gap-2 mb-2">
-                  <div className="w-8 h-8 rounded" style={{ backgroundColor: preset.primary }} />
-                  <div className="w-8 h-8 rounded" style={{ backgroundColor: preset.secondary }} />
-                  <div className="w-8 h-8 rounded" style={{ backgroundColor: preset.accent }} />
-                </div>
-                <p className="text-xs font-medium text-foreground">{preset.name}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Cores Personalizadas */}
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="primaryColor" className="text-foreground">Cor Primária</Label>
-            <div className="flex gap-4 mt-2">
-              <Input
-                id="primaryColor"
-                value={config.primaryColor}
-                onChange={(e) => updateSiteConfig({ primaryColor: e.target.value })}
-                placeholder="oklch(0.66 0.24 350)"
-              />
-              <div
-                className="w-16 h-10 rounded border-2 border-border"
-                style={{ backgroundColor: config.primaryColor }}
-              />
+            <div className="space-y-2">
+              <Label>Porcentagem</Label>
+              <Input value={formData.pct} onChange={(e) => setFormData({ ...formData, pct: e.target.value })} />
             </div>
           </div>
-
-          <div>
-            <Label htmlFor="secondaryColor" className="text-foreground">Cor Secundária</Label>
-            <div className="flex gap-4 mt-2">
-              <Input
-                id="secondaryColor"
-                value={config.secondaryColor}
-                onChange={(e) => updateSiteConfig({ secondaryColor: e.target.value })}
-                placeholder="oklch(0.27 0.02 330)"
-              />
-              <div
-                className="w-16 h-10 rounded border-2 border-border"
-                style={{ backgroundColor: config.secondaryColor }}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>Categoria</Label>
+            <Input value={formData.cat} onChange={(e) => setFormData({ ...formData, cat: e.target.value })} />
           </div>
-
-          <div>
-            <Label htmlFor="accentColor" className="text-foreground">Cor de Destaque (Dourado)</Label>
-            <div className="flex gap-4 mt-2">
-              <Input
-                id="accentColor"
-                value={config.accentColor}
-                onChange={(e) => updateSiteConfig({ accentColor: e.target.value })}
-                placeholder="oklch(0.84 0.15 88)"
-              />
-              <div
-                className="w-16 h-10 rounded border-2 border-border"
-                style={{ backgroundColor: config.accentColor }}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>Nome</Label>
+            <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
           </div>
-        </div>
-      </div>
-
-      {/* Preview das Cores */}
-      <div className="bg-card p-6 rounded-lg border border-border">
-        <h3 className="text-lg font-display text-gold mb-4">Preview das Cores</h3>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="p-6 rounded-lg text-center" style={{ backgroundColor: config.primaryColor }}>
-            <p className="text-white font-bold">Primária</p>
-            <p className="text-white/70 text-xs mt-1">Headers, botões</p>
+          <div className="space-y-2">
+            <Label>Subtítulo</Label>
+            <Input value={formData.sub} onChange={(e) => setFormData({ ...formData, sub: e.target.value })} />
           </div>
-          <div className="p-6 rounded-lg text-center" style={{ backgroundColor: config.secondaryColor }}>
-            <p className="text-white font-bold">Secundária</p>
-            <p className="text-white/70 text-xs mt-1">Fundos, cards</p>
-          </div>
-          <div className="p-6 rounded-lg text-center" style={{ backgroundColor: config.accentColor }}>
-            <p className="text-background font-bold">Destaque</p>
-            <p className="text-background/70 text-xs mt-1">Títulos, links</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ContentSection() {
-  const { data, resetData } = useAdminStore();
-
-  return (
-    <div className="space-y-6">
-      <div className="bg-card p-6 rounded-lg border border-border">
-        <h3 className="text-lg font-display text-gold mb-4">Gerenciamento de Conteúdo</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="p-4 bg-background rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground mb-1">Total de Categorias</p>
-            <p className="text-3xl font-display text-gold">{data.categories.length}</p>
-          </div>
-          <div className="p-4 bg-background rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground mb-1">Total de Nominees</p>
-            <p className="text-3xl font-display text-gold">
-              {data.categories.reduce((acc, cat) => acc + cat.nominees.length, 0)}
-            </p>
-          </div>
-          <div className="p-4 bg-background rounded-lg border border-border">
-            <p className="text-sm text-muted-foreground mb-1">Com Vídeos</p>
-            <p className="text-3xl font-display text-gold">
-              {data.categories.reduce((acc, cat) => 
-                acc + cat.nominees.filter(n => n.videoUrl).length, 0
-              )}
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-medium text-foreground mb-2">Exportar Dados</h4>
-            <p className="text-sm text-muted-foreground mb-3">
-              Baixe todos os dados editados em formato JSON
-            </p>
-            <Button
-              onClick={() => {
-                const dataStr = JSON.stringify(data, null, 2);
-                const dataBlob = new Blob([dataStr], { type: "application/json" });
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = `runway-wavy-backup-${new Date().toISOString()}.json`;
-                link.click();
-              }}
-              variant="outline"
-              className="border-pink-500/30 hover:bg-pink-500/10"
-            >
-              Baixar Backup (JSON)
+          <div className="flex gap-3">
+            <Button onClick={() => onSave(formData)} className="flex-1 bg-pink-500 hover:bg-pink-600">
+              Salvar
             </Button>
-          </div>
-
-          <div className="pt-6 border-t border-border">
-            <h4 className="font-medium text-destructive mb-2">⚠️ Zona de Perigo</h4>
-            <p className="text-sm text-muted-foreground mb-3">
-              Restaurar todos os dados para o padrão. Esta ação não pode ser desfeita!
-            </p>
-            <Button
-              onClick={() => {
-                if (confirm("Tem certeza? Todos os dados editados serão perdidos!")) {
-                  resetData();
-                  alert("Dados restaurados com sucesso!");
-                }
-              }}
-              variant="destructive"
-            >
-              Restaurar Padrão
+            <Button onClick={onClose} variant="outline">
+              Cancelar
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Dialog para editar estatística
+function StatDialog({
+  stat,
+  onSave,
+  onClose,
+}: {
+  stat: { n: string; label: string };
+  onSave: (updates: Partial<typeof stat>) => void;
+  onClose: () => void;
+}) {
+  const [formData, setFormData] = useState(stat);
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="font-display text-gold">Editar Estatística</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Número</Label>
+            <Input value={formData.n} onChange={(e) => setFormData({ ...formData, n: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Label</Label>
+            <Input value={formData.label} onChange={(e) => setFormData({ ...formData, label: e.target.value })} />
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={() => onSave(formData)} className="flex-1 bg-pink-500 hover:bg-pink-600">
+              Salvar
+            </Button>
+            <Button onClick={onClose} variant="outline">
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

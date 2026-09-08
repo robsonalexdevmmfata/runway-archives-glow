@@ -22,14 +22,10 @@ function AdminLogin() {
     setError("");
     setLoading(true);
 
-    // Simulando autenticação
     setTimeout(() => {
       if (username === "admin" && password === "1234") {
-        // Salvar sessão
         localStorage.setItem("admin_session", "true");
         localStorage.setItem("admin_user", username);
-        
-        // Redirecionar para dashboard
         navigate({ to: "/admin/dashboard" });
       } else {
         setError("Usuário ou senha incorretos!");
@@ -40,10 +36,9 @@ function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-panel to-background p-4">
-      {/* Fundo animado */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gold/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gold/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
       <Card className="w-full max-w-md relative z-10 border-pink-500/20 shadow-[0_0_40px_rgba(236,72,153,0.1)]">
