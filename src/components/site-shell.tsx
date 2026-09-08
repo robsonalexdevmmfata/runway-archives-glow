@@ -25,6 +25,7 @@ const ticker = [
 ];
 
 export function SiteShell({ children }: { children: ReactNode }) {
+  const { siteConfig } = useAdminStore();
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <header className="fixed inset-x-0 top-0 z-30 flex h-20 items-center gap-4 bg-primary px-4 text-primary-foreground">
